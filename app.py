@@ -39,6 +39,17 @@ def init_db():
             score INTEGER DEFAULT 0,
             total INTEGER DEFAULT 25
         );
+        CREATE TABLE IF NOT EXISTS bookmarks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            statement TEXT NOT NULL,
+            theme TEXT NOT NULL,
+            difficulty INTEGER NOT NULL,
+            correct_answer INTEGER NOT NULL,
+            explanation TEXT NOT NULL,
+            user_answer INTEGER,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            reviewed BOOLEAN DEFAULT 0
+        );
     """)
     conn.commit()
     conn.close()
@@ -271,6 +282,62 @@ def get_stats():
             for r in recent
         ]
     })
+
+
+@app.route("/api/bookmark", methods=["POST"])
+def add_bookmark():
+    data = request.json
+    conn = get_db()
+    conn.execute(
+        """INSERT INTO bookmarks (statement, theme, difficulty, correct_answer, explanation, user_answer)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        (data["statement"], data["theme"], data["difficulty"],
+         data["correct_answer"], data["explanation"], data.get("user_answer"))
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "ok"})
+
+
+@app.route("/api/bookmarks")
+def get_bookmarks():
+    conn = get_db()
+    rows = conn.execute(
+        "SELECT * FROM bookmarks ORDER BY reviewed ASC, created_at DESC"
+    ).fetchall()
+    conn.close()
+    return jsonify([
+        {
+            "id": r["id"],
+            "statement": r["statement"],
+            "theme": r["theme"],
+            "difficulty": r["difficulty"],
+            "correct_answer": r["correct_answer"],
+            "explanation": r["explanation"],
+            "user_answer": r["user_answer"],
+            "date": r["created_at"],
+            "reviewed": bool(r["reviewed"])
+        }
+        for r in rows
+    ])
+
+
+@app.route("/api/bookmark/<int:bid>/review", methods=["POST"])
+def toggle_review(bid):
+    conn = get_db()
+    conn.execute("UPDATE bookmarks SET reviewed = NOT reviewed WHERE id = ?", (bid,))
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "ok"})
+
+
+@app.route("/api/bookmark/<int:bid>", methods=["DELETE"])
+def delete_bookmark(bid):
+    conn = get_db()
+    conn.execute("DELETE FROM bookmarks WHERE id = ?", (bid,))
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "ok"})
 
 
 @app.route("/api/stats/reset", methods=["POST"])

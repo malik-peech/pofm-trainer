@@ -14,6 +14,7 @@
             <button class="nav-btn active" onclick="showPage('home')">Accueil</button>
             <button class="nav-btn" onclick="showPage('exercise')">Exercice</button>
             <button class="nav-btn" onclick="showPage('exam')">Concours Blanc</button>
+            <button class="nav-btn" onclick="showPage('review')">A revoir</button>
             <button class="nav-btn" onclick="showPage('stats')">Mes Stats</button>
         </nav>
     </header>
@@ -148,6 +149,16 @@
             </div>
         </section>
 
+        <!-- A REVOIR -->
+        <section id="page-review" class="page">
+            <h2>A revoir avec Papa</h2>
+            <p class="review-subtitle">Les exercices que tu as marques pour les revoir le soir.</p>
+            <div id="review-empty" style="display:none;">
+                <p class="muted">Aucun exercice marque. Clique sur l'etoile apres un exercice pour l'ajouter ici !</p>
+            </div>
+            <div id="review-list"></div>
+        </section>
+
         <!-- STATS -->
         <section id="page-stats" class="page">
             <h2>Mes Statistiques</h2>
@@ -185,8 +196,9 @@
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById('page-' + page).classList.add('active');
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.nav-btn')[['home','exercise','exam','stats'].indexOf(page)].classList.add('active');
+        document.querySelectorAll('.nav-btn')[['home','exercise','exam','review','stats'].indexOf(page)].classList.add('active');
         if (page === 'stats') loadStats();
+        if (page === 'review') loadBookmarks();
     }
 
     // ===== INDIVIDUAL EXERCISE =====
@@ -227,6 +239,14 @@
         const resultDiv = document.getElementById('ex-result');
         resultDiv.style.display = 'block';
         resultDiv.className = 'result-area ' + (data.correct ? 'correct' : 'incorrect');
+        lastSubmitData = {
+            statement: currentExercise.statement,
+            theme: currentExercise.theme,
+            difficulty: currentExercise.difficulty,
+            correct_answer: data.correct_answer,
+            explanation: data.explanation,
+            user_answer: data.your_answer
+        };
         resultDiv.innerHTML = `
             <div class="result-header">${data.correct ? 'Bravo !' : 'Pas tout a fait...'}</div>
             <div class="result-answer">
@@ -236,8 +256,11 @@
             <div class="result-explanation">
                 <strong>Explication :</strong> ${data.explanation}
             </div>
+            <button class="btn btn-bookmark" onclick="bookmarkExercise(this)">&#9733; A revoir ce soir</button>
         `;
     }
+
+    let lastSubmitData = null;
 
     // ===== EXAM MODE =====
     let examData = null;
@@ -330,7 +353,17 @@
                 Reponse : <strong>${data.correct_answer}</strong>
             </div>
             <div class="result-explanation"><strong>Explication :</strong> ${data.explanation}</div>
+            <button class="btn btn-bookmark" onclick="bookmarkExamExercise(this, ${examIndex})">&#9733; A revoir ce soir</button>
         `;
+        // Store for bookmark
+        examData.exercises[examIndex]._submitData = {
+            statement: ex.statement,
+            theme: ex.theme,
+            difficulty: ex.difficulty,
+            correct_answer: data.correct_answer,
+            explanation: data.explanation,
+            user_answer: data.your_answer
+        };
 
         document.getElementById('exam-next-btn').style.display = 'block';
         document.getElementById('exam-next-btn').textContent =
@@ -457,6 +490,79 @@
         if (!confirm('Es-tu sur de vouloir effacer toutes tes statistiques ?')) return;
         await fetch('/api/stats/reset', { method: 'POST' });
         loadStats();
+    }
+
+    // ===== BOOKMARKS (A REVOIR) =====
+    async function bookmarkExercise(btn) {
+        if (!lastSubmitData) return;
+        await fetch('/api/bookmark', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(lastSubmitData)
+        });
+        btn.textContent = 'Marque !';
+        btn.disabled = true;
+        btn.classList.add('bookmarked');
+    }
+
+    async function bookmarkExamExercise(btn, idx) {
+        const d = examData.exercises[idx]._submitData;
+        if (!d) return;
+        await fetch('/api/bookmark', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(d)
+        });
+        btn.textContent = 'Marque !';
+        btn.disabled = true;
+        btn.classList.add('bookmarked');
+    }
+
+    async function loadBookmarks() {
+        const res = await fetch('/api/bookmarks');
+        const data = await res.json();
+        const emptyDiv = document.getElementById('review-empty');
+        const listDiv = document.getElementById('review-list');
+
+        if (data.length === 0) {
+            emptyDiv.style.display = 'block';
+            listDiv.innerHTML = '';
+            return;
+        }
+        emptyDiv.style.display = 'none';
+
+        listDiv.innerHTML = data.map(b => `
+            <div class="review-card ${b.reviewed ? 'reviewed' : ''}">
+                <div class="review-header">
+                    <div class="exercise-meta">
+                        <span class="badge badge-${b.theme}">${b.theme}</span>
+                        <span class="badge badge-diff-${b.difficulty}">Diff. ${b.difficulty}</span>
+                        <span class="muted">${b.date ? b.date.split(' ')[0] : ''}</span>
+                    </div>
+                    <div class="review-actions">
+                        <button class="btn btn-sm ${b.reviewed ? 'btn-reviewed' : 'btn-secondary'}"
+                                onclick="toggleReview(${b.id})">
+                            ${b.reviewed ? 'Compris !' : 'Marquer comme compris'}
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteBookmark(${b.id})">Supprimer</button>
+                    </div>
+                </div>
+                <div class="exercise-statement">${b.statement}</div>
+                ${b.user_answer !== null ? `<div class="review-wrong">Ta reponse : ${b.user_answer}</div>` : ''}
+                <div class="review-answer">Bonne reponse : <strong>${b.correct_answer}</strong></div>
+                <div class="result-explanation"><strong>Explication :</strong> ${b.explanation}</div>
+            </div>
+        `).join('');
+    }
+
+    async function toggleReview(id) {
+        await fetch(`/api/bookmark/${id}/review`, { method: 'POST' });
+        loadBookmarks();
+    }
+
+    async function deleteBookmark(id) {
+        await fetch(`/api/bookmark/${id}`, { method: 'DELETE' });
+        loadBookmarks();
     }
     </script>
 </body>

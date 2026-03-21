@@ -24,6 +24,14 @@ def get_db():
 
 def init_db():
     conn = get_db()
+    # Drop old tables without user_id to force clean schema
+    try:
+        row = conn.execute("PRAGMA table_info(results)").fetchall()
+        cols = [r[1] for r in row]
+        if 'user_id' not in cols:
+            conn.executescript("DROP TABLE IF EXISTS results; DROP TABLE IF EXISTS exam_sessions; DROP TABLE IF EXISTS bookmarks; DROP TABLE IF EXISTS exercise_store;")
+    except Exception:
+        pass
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS results (
             id INTEGER PRIMARY KEY AUTOINCREMENT,

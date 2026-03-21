@@ -46,6 +46,15 @@ def init_db():
             score INTEGER DEFAULT 0,
             total INTEGER DEFAULT 25
         );
+        CREATE TABLE IF NOT EXISTS exercise_store (
+            id INTEGER PRIMARY KEY,
+            theme TEXT NOT NULL,
+            difficulty INTEGER NOT NULL,
+            statement TEXT NOT NULL,
+            answer INTEGER NOT NULL,
+            explanation TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
         CREATE TABLE IF NOT EXISTS bookmarks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id TEXT NOT NULL DEFAULT 'alia',
@@ -70,7 +79,28 @@ def load_exercises():
 
 init_db()
 
-exercise_cache = {}
+
+def store_exercise(ex):
+    """Persiste un exercice genere dans SQLite."""
+    conn = get_db()
+    conn.execute(
+        "INSERT OR REPLACE INTO exercise_store (id, theme, difficulty, statement, answer, explanation) VALUES (?,?,?,?,?,?)",
+        (ex["id"], ex["theme"], ex["difficulty"], ex["statement"], ex["answer"], ex["explanation"])
+    )
+    conn.commit()
+    conn.close()
+
+
+def find_exercise(exercise_id):
+    """Retrouve un exercice par ID (DB generee puis banque statique)."""
+    conn = get_db()
+    row = conn.execute("SELECT * FROM exercise_store WHERE id = ?", (exercise_id,)).fetchone()
+    conn.close()
+    if row:
+        return {"id": row["id"], "theme": row["theme"], "difficulty": row["difficulty"],
+                "statement": row["statement"], "answer": row["answer"], "explanation": row["explanation"]}
+    exercises = load_exercises()
+    return next((e for e in exercises if e["id"] == exercise_id), None)
 
 
 @app.route("/")
@@ -92,7 +122,7 @@ def random_exercise():
     if not ex:
         return jsonify({"error": "Aucun exercice trouve"}), 404
 
-    exercise_cache[ex["id"]] = ex
+    store_exercise(ex)
     return jsonify({
         "id": ex["id"],
         "theme": ex["theme"],
@@ -108,7 +138,7 @@ def generate_exam_route():
     exercises = gen_exam(25)
 
     for ex in exercises:
-        exercise_cache[ex["id"]] = ex
+        store_exercise(ex)
 
     conn = get_db()
     conn.execute(
@@ -138,10 +168,7 @@ def submit_answer():
     session_id = data.get("session_id")
     user_id = data.get("user", "alia")
 
-    exercise = exercise_cache.get(exercise_id)
-    if not exercise:
-        exercises = load_exercises()
-        exercise = next((e for e in exercises if e["id"] == exercise_id), None)
+    exercise = find_exercise(exercise_id)
 
     if not exercise:
         return jsonify({"error": "Exercice introuvable"}), 404

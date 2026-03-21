@@ -787,6 +787,187 @@ def combi_train_wagons():
 
 
 # ============================================================
+# LYCEE - TEMPLATES NIVEAU PREMIERE+ (pour Imran)
+# ============================================================
+
+def lycee_congruences():
+    """Style: reste de division euclidienne avec puissances"""
+    base = random.choice([2, 3, 7, 11, 13])
+    mod = random.choice([5, 7, 9, 11, 13])
+    while base % mod == 0:
+        mod = random.choice([5, 7, 9, 11, 13])
+    exp = random.randint(20, 200)
+    answer = pow(base, exp, mod)
+    return {
+        "theme": "arithmetique", "difficulty": 5,
+        "statement": f"Quel est le reste de la division euclidienne de {base}^{exp} par {mod} ?",
+        "answer": answer,
+        "explanation": f"On calcule les puissances de {base} modulo {mod} jusqu'a trouver un cycle, puis on utilise {exp} mod (longueur du cycle). Reste = {answer}."
+    }
+
+
+def lycee_suites_arithmetiques():
+    """Style: somme de termes d'une suite arithmetique"""
+    a = random.randint(1, 10)
+    r = random.randint(2, 8)
+    n = random.randint(15, 50)
+    last = a + (n - 1) * r
+    somme = n * (a + last) // 2
+    if n * (a + last) % 2 != 0:
+        return lycee_suites_arithmetiques()
+    return {
+        "theme": "calcul", "difficulty": 5,
+        "statement": f"Soit (u_n) la suite arithmetique de premier terme u_1 = {a} et de raison {r}. Que vaut la somme u_1 + u_2 + ... + u_{n} ?",
+        "answer": somme,
+        "explanation": f"u_{n} = {a} + ({n}-1) x {r} = {last}. Somme = {n} x ({a} + {last}) / 2 = {somme}."
+    }
+
+
+def lycee_suites_geometriques():
+    """Style: somme d'une suite geometrique"""
+    a = random.randint(1, 5)
+    q = random.randint(2, 3)
+    n = random.randint(5, 10)
+    somme = a * (q ** n - 1) // (q - 1)
+    if a * (q ** n - 1) % (q - 1) != 0:
+        return lycee_suites_geometriques()
+    return {
+        "theme": "calcul", "difficulty": 5,
+        "statement": f"Soit (u_n) la suite geometrique de premier terme u_0 = {a} et de raison {q}. Que vaut u_0 + u_1 + ... + u_{n-1} ?",
+        "answer": somme,
+        "explanation": f"Somme = {a} x ({q}^{n} - 1) / ({q} - 1) = {a} x {q**n - 1} / {q - 1} = {somme}."
+    }
+
+
+def lycee_binome_newton():
+    """Style: coefficient dans un developpement binomial"""
+    n = random.randint(4, 10)
+    k = random.randint(1, n - 1)
+    coeff = math.comb(n, k)
+    return {
+        "theme": "combinatoire", "difficulty": 5,
+        "statement": f"Dans le developpement de (1 + x)^{n}, quel est le coefficient de x^{k} ?",
+        "answer": coeff,
+        "explanation": f"Par la formule du binome, le coefficient de x^{k} dans (1+x)^{n} est C({n},{k}) = {coeff}."
+    }
+
+
+def lycee_equation_second_degre():
+    """Style: somme/produit des racines"""
+    # x^2 - sx + p = 0 with integer roots
+    r1 = random.randint(-10, 15)
+    r2 = random.randint(-10, 15)
+    while r1 == r2:
+        r2 = random.randint(-10, 15)
+    s = r1 + r2
+    p = r1 * r2
+    target = random.choice(["r1^2+r2^2", "r1^3+r2^3", "1/r1+1/r2"])
+    if target == "r1^2+r2^2":
+        answer = s * s - 2 * p
+        stmt = f"Les racines de x^2 - {s}x + {p} = 0 sont r1 et r2. Que vaut r1^2 + r2^2 ?"
+        expl = f"r1^2 + r2^2 = (r1+r2)^2 - 2*r1*r2 = {s}^2 - 2*{p} = {answer}."
+    elif target == "r1^3+r2^3":
+        answer = s * (s * s - 3 * p)
+        stmt = f"Les racines de x^2 - {s}x + {p} = 0 sont r1 et r2. Que vaut r1^3 + r2^3 ?"
+        expl = f"r1^3+r2^3 = (r1+r2)(r1^2-r1*r2+r2^2) = (r1+r2)((r1+r2)^2-3*r1*r2) = {s} x ({s*s}-3x{p}) = {answer}."
+    else:
+        if p == 0:
+            return lycee_equation_second_degre()
+        # 1/r1 + 1/r2 = s/p, give s+p where result = s/p as irreducible
+        g = gcd(abs(s), abs(p))
+        a_frac = s // g
+        b_frac = p // g
+        if b_frac < 0:
+            a_frac, b_frac = -a_frac, -b_frac
+        answer = abs(a_frac) + abs(b_frac)
+        stmt = f"Les racines de x^2 - {s}x + {p} = 0 sont r1 et r2. 1/r1 + 1/r2 s'ecrit a/b irreductible. Que vaut |a| + |b| ?"
+        expl = f"1/r1 + 1/r2 = (r1+r2)/(r1*r2) = {s}/{p} = {a_frac}/{b_frac}. |a|+|b| = {answer}."
+    return {
+        "theme": "calcul", "difficulty": 5,
+        "statement": stmt, "answer": answer, "explanation": expl
+    }
+
+
+def lycee_denombrement_avance():
+    """Style: nombre de surjections ou derangements"""
+    # Derangements D(n) - nombre de permutations sans point fixe
+    n = random.randint(4, 7)
+    # D(n) = n! * sum_{k=0}^{n} (-1)^k / k!
+    dn = 0
+    fact_n = math.factorial(n)
+    for k in range(n + 1):
+        dn += ((-1) ** k) * fact_n // math.factorial(k)
+    return {
+        "theme": "combinatoire", "difficulty": 5,
+        "statement": f"On melange {n} lettres et {n} enveloppes. De combien de facons peut-on mettre chaque lettre dans une mauvaise enveloppe (aucune lettre dans la bonne) ?",
+        "answer": dn,
+        "explanation": f"C'est le nombre de derangements D({n}). Par la formule d'inclusion-exclusion : D({n}) = {dn}."
+    }
+
+
+def lycee_modular_inverse():
+    """Style: trouver x tel que ax = 1 mod n"""
+    n = random.choice([7, 11, 13, 17, 19, 23])
+    a = random.randint(2, n - 1)
+    while gcd(a, n) != 1:
+        a = random.randint(2, n - 1)
+    answer = pow(a, -1, n)
+    return {
+        "theme": "arithmetique", "difficulty": 5,
+        "statement": f"Quel est le plus petit entier positif x tel que {a} x x soit congru a 1 modulo {n} ?",
+        "answer": answer,
+        "explanation": f"On cherche x tel que {a}x = 1 mod {n}. En testant : {a} x {answer} = {a * answer} = {(a * answer) // n} x {n} + 1. Donc x = {answer}."
+    }
+
+
+def lycee_probabilites():
+    """Style: probabilite avec denombrement"""
+    n = random.randint(5, 8)
+    # Proba de tirer k boules rouges parmi n boules (r rouges, b bleues)
+    r = random.randint(2, n - 1)
+    b = n - r
+    k = random.randint(2, min(3, r))
+    tirage = random.randint(k, min(n, k + 2))
+    # Nombre de facons favorables / total
+    favorable = math.comb(r, k) * math.comb(b, tirage - k)
+    total = math.comb(n, tirage)
+    if favorable == 0 or tirage - k > b:
+        return lycee_probabilites()
+    g = gcd(favorable, total)
+    a, bb = favorable // g, total // g
+    answer = a + bb
+    return {
+        "theme": "combinatoire", "difficulty": 5,
+        "statement": f"Une urne contient {r} boules rouges et {b} boules bleues. On tire {tirage} boules. La probabilite d'obtenir exactement {k} boules rouges s'ecrit a/b irreductible. Que vaut a + b ?",
+        "answer": answer,
+        "explanation": f"Favorable = C({r},{k}) x C({b},{tirage-k}) = {favorable}. Total = C({n},{tirage}) = {total}. P = {favorable}/{total} = {a}/{bb}. a+b = {answer}."
+    }
+
+
+def lycee_systeme_lineaire():
+    """Style: systeme de 2 equations a 2 inconnues"""
+    x = random.randint(-5, 10)
+    y = random.randint(-5, 10)
+    a1 = random.randint(1, 5)
+    b1 = random.randint(-5, 5)
+    a2 = random.randint(-5, 5)
+    b2 = random.randint(1, 5)
+    while a1 * b2 - a2 * b1 == 0:
+        b2 = random.randint(1, 5)
+    c1 = a1 * x + b1 * y
+    c2 = a2 * x + b2 * y
+    answer = x + y
+    s1 = f"{a1}x" + (f" + {b1}y" if b1 > 0 else f" - {-b1}y" if b1 < 0 else "") + f" = {c1}"
+    s2 = f"{a2}x" + (f" + {b2}y" if b2 > 0 else f" - {-b2}y" if b2 < 0 else "") + f" = {c2}"
+    return {
+        "theme": "calcul", "difficulty": 4,
+        "statement": f"On a le systeme : {s1} et {s2}. Que vaut x + y ?",
+        "answer": answer,
+        "explanation": f"En resolvant le systeme, on trouve x = {x} et y = {y}. Donc x + y = {answer}."
+    }
+
+
+# ============================================================
 # REGISTRE DE TOUS LES GENERATEURS
 # ============================================================
 
@@ -805,6 +986,10 @@ GENERATORS = {
         (3, calc_nombre_inverse),
         (4, calc_somme_carres),
         (4, calc_produit_telescopique),
+        (4, lycee_systeme_lineaire),
+        (5, lycee_suites_arithmetiques),
+        (5, lycee_suites_geometriques),
+        (5, lycee_equation_second_degre),
     ],
     "geometrie": [
         (1, geo_cercle_rectangle),
@@ -831,6 +1016,8 @@ GENERATORS = {
         (4, arith_puissances),
         (5, arith_factorielle_divisible),
         (5, arith_non_divisibles),
+        (5, lycee_congruences),
+        (5, lycee_modular_inverse),
     ],
     "combinatoire": [
         (1, combi_chaussettes),
@@ -843,6 +1030,9 @@ GENERATORS = {
         (4, combi_des),
         (4, combi_pieces),
         (4, combi_nombres_somme_chiffres),
+        (5, lycee_binome_newton),
+        (5, lycee_denombrement_avance),
+        (5, lycee_probabilites),
     ],
 }
 

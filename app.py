@@ -10,6 +10,11 @@ app = Flask(__name__)
 DB_PATH = os.path.join(os.path.dirname(__file__), "pofm.db")
 EXERCISES_PATH = os.path.join(os.path.dirname(__file__), "exercises.json")
 
+USERS = {
+    "alia": {"name": "Alia", "level": "college", "class": "4eme"},
+    "imran": {"name": "Imran", "level": "lycee", "class": "1ere"},
+}
+
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -22,6 +27,7 @@ def init_db():
     conn.executescript("""
         CREATE TABLE IF NOT EXISTS results (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL DEFAULT 'alia',
             exercise_id INTEGER NOT NULL,
             theme TEXT NOT NULL,
             difficulty INTEGER NOT NULL,
@@ -34,6 +40,7 @@ def init_db():
         );
         CREATE TABLE IF NOT EXISTS exam_sessions (
             id TEXT PRIMARY KEY,
+            user_id TEXT NOT NULL DEFAULT 'alia',
             started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             finished_at TIMESTAMP,
             score INTEGER DEFAULT 0,
@@ -41,6 +48,7 @@ def init_db():
         );
         CREATE TABLE IF NOT EXISTS bookmarks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id TEXT NOT NULL DEFAULT 'alia',
             statement TEXT NOT NULL,
             theme TEXT NOT NULL,
             difficulty INTEGER NOT NULL,
@@ -62,13 +70,17 @@ def load_exercises():
 
 init_db()
 
-# Cache des exercices generes (pour pouvoir verifier les reponses)
 exercise_cache = {}
 
 
 @app.route("/")
 def index():
     return render_template("index.html")
+
+
+@app.route("/api/users")
+def get_users():
+    return jsonify(USERS)
 
 
 @app.route("/api/exercise/random")
@@ -80,9 +92,7 @@ def random_exercise():
     if not ex:
         return jsonify({"error": "Aucun exercice trouve"}), 404
 
-    # Stocker dans le cache pour la verification
     exercise_cache[ex["id"]] = ex
-
     return jsonify({
         "id": ex["id"],
         "theme": ex["theme"],
@@ -94,34 +104,27 @@ def random_exercise():
 @app.route("/api/exam/generate")
 def generate_exam_route():
     session_id = datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(100, 999))
+    user_id = request.args.get("user", "alia")
     exercises = gen_exam(25)
 
-    # Stocker dans le cache
     for ex in exercises:
         exercise_cache[ex["id"]] = ex
 
-    # Save session
     conn = get_db()
     conn.execute(
-        "INSERT INTO exam_sessions (id, total) VALUES (?, ?)",
-        (session_id, len(exercises))
+        "INSERT INTO exam_sessions (id, user_id, total) VALUES (?, ?, ?)",
+        (session_id, user_id, len(exercises))
     )
     conn.commit()
     conn.close()
 
-    exam_exercises = []
-    for i, ex in enumerate(exercises, 1):
-        exam_exercises.append({
-            "num": i,
-            "id": ex["id"],
-            "theme": ex["theme"],
-            "difficulty": ex["difficulty"],
-            "statement": ex["statement"]
-        })
-
     return jsonify({
         "session_id": session_id,
-        "exercises": exam_exercises,
+        "exercises": [
+            {"num": i, "id": ex["id"], "theme": ex["theme"],
+             "difficulty": ex["difficulty"], "statement": ex["statement"]}
+            for i, ex in enumerate(exercises, 1)
+        ],
         "total": len(exercises)
     })
 
@@ -133,11 +136,9 @@ def submit_answer():
     user_answer = data.get("answer")
     mode = data.get("mode", "individual")
     session_id = data.get("session_id")
+    user_id = data.get("user", "alia")
 
-    # Chercher dans le cache (exercices generes)
     exercise = exercise_cache.get(exercise_id)
-
-    # Fallback sur la banque statique
     if not exercise:
         exercises = load_exercises()
         exercise = next((e for e in exercises if e["id"] == exercise_id), None)
@@ -150,9 +151,9 @@ def submit_answer():
     conn = get_db()
     conn.execute(
         """INSERT INTO results
-           (exercise_id, theme, difficulty, user_answer, correct_answer, is_correct, mode, session_id)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-        (exercise_id, exercise["theme"], exercise["difficulty"],
+           (user_id, exercise_id, theme, difficulty, user_answer, correct_answer, is_correct, mode, session_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (user_id, exercise_id, exercise["theme"], exercise["difficulty"],
          user_answer, exercise["answer"], is_correct, mode, session_id)
     )
     if session_id and is_correct:
@@ -199,40 +200,42 @@ def finish_exam():
 
 @app.route("/api/stats")
 def get_stats():
+    user_id = request.args.get("user")
     conn = get_db()
 
-    # Global stats
-    total = conn.execute("SELECT COUNT(*) as c FROM results").fetchone()["c"]
-    correct = conn.execute("SELECT COUNT(*) as c FROM results WHERE is_correct = 1").fetchone()["c"]
+    where = "WHERE user_id = ?" if user_id else ""
+    params = (user_id,) if user_id else ()
 
-    # Stats by theme
-    theme_stats = conn.execute("""
-        SELECT theme,
-               COUNT(*) as total,
+    total = conn.execute(f"SELECT COUNT(*) as c FROM results {where}", params).fetchone()["c"]
+    correct = conn.execute(f"SELECT COUNT(*) as c FROM results {where} AND is_correct = 1" if user_id else "SELECT COUNT(*) as c FROM results WHERE is_correct = 1", params if user_id else ()).fetchone()["c"]
+
+    theme_stats = conn.execute(f"""
+        SELECT theme, COUNT(*) as total,
                SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct
-        FROM results GROUP BY theme ORDER BY theme
-    """).fetchall()
+        FROM results {where} GROUP BY theme ORDER BY theme
+    """, params).fetchall()
 
-    # Stats by difficulty
-    diff_stats = conn.execute("""
-        SELECT difficulty,
-               COUNT(*) as total,
+    diff_stats = conn.execute(f"""
+        SELECT difficulty, COUNT(*) as total,
                SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct
-        FROM results GROUP BY difficulty ORDER BY difficulty
-    """).fetchall()
+        FROM results {where} GROUP BY difficulty ORDER BY difficulty
+    """, params).fetchall()
 
-    # Recent exams
-    exams = conn.execute("""
-        SELECT id, started_at, score, total
-        FROM exam_sessions
-        WHERE finished_at IS NOT NULL
-        ORDER BY started_at DESC LIMIT 10
-    """).fetchall()
+    exam_where = "WHERE user_id = ? AND finished_at IS NOT NULL" if user_id else "WHERE finished_at IS NOT NULL"
+    exams = conn.execute(f"""
+        SELECT id, started_at, score, total FROM exam_sessions
+        {exam_where} ORDER BY started_at DESC LIMIT 10
+    """, params).fetchall()
 
-    # Progress over time (last 20 answers)
-    recent = conn.execute("""
-        SELECT exercise_id, theme, difficulty, is_correct, created_at
-        FROM results ORDER BY created_at DESC LIMIT 20
+    # Daily points: each exercise gives points based on difficulty
+    daily = conn.execute(f"""
+        SELECT DATE(created_at) as day, user_id,
+               SUM(CASE WHEN is_correct THEN difficulty ELSE 0 END) as points,
+               COUNT(*) as total_exos,
+               SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct_exos
+        FROM results
+        GROUP BY DATE(created_at), user_id
+        ORDER BY day ASC
     """).fetchall()
 
     conn.close()
@@ -244,42 +247,24 @@ def get_stats():
             "percentage": round(correct / total * 100, 1) if total > 0 else 0
         },
         "by_theme": [
-            {
-                "theme": r["theme"],
-                "total": r["total"],
-                "correct": r["correct"],
-                "percentage": round(r["correct"] / r["total"] * 100, 1) if r["total"] > 0 else 0
-            }
+            {"theme": r["theme"], "total": r["total"], "correct": r["correct"],
+             "percentage": round(r["correct"] / r["total"] * 100, 1) if r["total"] > 0 else 0}
             for r in theme_stats
         ],
         "by_difficulty": [
-            {
-                "difficulty": r["difficulty"],
-                "total": r["total"],
-                "correct": r["correct"],
-                "percentage": round(r["correct"] / r["total"] * 100, 1) if r["total"] > 0 else 0
-            }
+            {"difficulty": r["difficulty"], "total": r["total"], "correct": r["correct"],
+             "percentage": round(r["correct"] / r["total"] * 100, 1) if r["total"] > 0 else 0}
             for r in diff_stats
         ],
         "recent_exams": [
-            {
-                "id": r["id"],
-                "date": r["started_at"],
-                "score": r["score"],
-                "total": r["total"],
-                "percentage": round(r["score"] / r["total"] * 100, 1)
-            }
+            {"id": r["id"], "date": r["started_at"], "score": r["score"],
+             "total": r["total"], "percentage": round(r["score"] / r["total"] * 100, 1)}
             for r in exams
         ],
-        "recent_answers": [
-            {
-                "exercise_id": r["exercise_id"],
-                "theme": r["theme"],
-                "difficulty": r["difficulty"],
-                "correct": bool(r["is_correct"]),
-                "date": r["created_at"]
-            }
-            for r in recent
+        "daily": [
+            {"day": r["day"], "user": r["user_id"], "points": r["points"],
+             "total_exos": r["total_exos"], "correct_exos": r["correct_exos"]}
+            for r in daily
         ]
     })
 
@@ -287,11 +272,12 @@ def get_stats():
 @app.route("/api/bookmark", methods=["POST"])
 def add_bookmark():
     data = request.json
+    user_id = data.get("user", "alia")
     conn = get_db()
     conn.execute(
-        """INSERT INTO bookmarks (statement, theme, difficulty, correct_answer, explanation, user_answer)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        (data["statement"], data["theme"], data["difficulty"],
+        """INSERT INTO bookmarks (user_id, statement, theme, difficulty, correct_answer, explanation, user_answer)
+           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (user_id, data["statement"], data["theme"], data["difficulty"],
          data["correct_answer"], data["explanation"], data.get("user_answer"))
     )
     conn.commit()
@@ -301,23 +287,18 @@ def add_bookmark():
 
 @app.route("/api/bookmarks")
 def get_bookmarks():
+    user_id = request.args.get("user", "alia")
     conn = get_db()
     rows = conn.execute(
-        "SELECT * FROM bookmarks ORDER BY reviewed ASC, created_at DESC"
+        "SELECT * FROM bookmarks WHERE user_id = ? ORDER BY reviewed ASC, created_at DESC",
+        (user_id,)
     ).fetchall()
     conn.close()
     return jsonify([
-        {
-            "id": r["id"],
-            "statement": r["statement"],
-            "theme": r["theme"],
-            "difficulty": r["difficulty"],
-            "correct_answer": r["correct_answer"],
-            "explanation": r["explanation"],
-            "user_answer": r["user_answer"],
-            "date": r["created_at"],
-            "reviewed": bool(r["reviewed"])
-        }
+        {"id": r["id"], "statement": r["statement"], "theme": r["theme"],
+         "difficulty": r["difficulty"], "correct_answer": r["correct_answer"],
+         "explanation": r["explanation"], "user_answer": r["user_answer"],
+         "date": r["created_at"], "reviewed": bool(r["reviewed"])}
         for r in rows
     ])
 

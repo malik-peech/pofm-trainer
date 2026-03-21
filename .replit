@@ -4,14 +4,10 @@ entrypoint = "app.py"
 modules = ["python-3.11"]
 
 [env]
-PORT = "8080"
+PORT = "5000"
 
 [nix]
 channel = "stable-24_05"
-
-[[ports]]
-localPort = 8080
-externalPort = 80
 
 [[ports]]
 localPort = 5000
@@ -20,9 +16,6 @@ externalPort = 80
 [deployment]
 deploymentTarget = "autoscale"
 run = ["gunicorn", "--bind=0.0.0.0:5000", "--reuse-port", "app:app"]
-
-[agent]
-expertMode = true
 
 [workflows]
 runButton = "Project"

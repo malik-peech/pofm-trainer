@@ -1,0 +1,13 @@
+run = "pip install flask && python app.py"
+language = "python3"
+entrypoint = "app.py"
+
+[env]
+PORT = "8080"
+
+[nix]
+channel = "stable-24_05"
+
+[[ports]]
+localPort = 8080
+externalPort = 80

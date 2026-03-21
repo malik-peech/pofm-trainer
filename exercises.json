@@ -1,0 +1,482 @@
+[
+  {
+    "id": 1,
+    "theme": "calcul",
+    "difficulty": 1,
+    "statement": "Marie et Lucas doivent tous les deux calculer 12 - (3 + 4). Marie obtient la bonne réponse R. Lucas oublie les parenthèses et calcule 12 - 3 + 4 et obtient la réponse L. Que vaut L - R ?",
+    "answer": 8,
+    "explanation": "R = 12 - (3+4) = 12 - 7 = 5. Lucas calcule L = 12 - 3 + 4 = 13. Donc L - R = 13 - 5 = 8."
+  },
+  {
+    "id": 2,
+    "theme": "calcul",
+    "difficulty": 1,
+    "statement": "Cinq élèves passent un contrôle noté sur 20. Les notes des quatre premiers sont 11, 14, 16 et 19. La moyenne des cinq notes est 15. Quelle est la note du cinquième élève ?",
+    "answer": 15,
+    "explanation": "La somme des 5 notes vaut 5 × 15 = 75. La somme des 4 premières vaut 11 + 14 + 16 + 19 = 60. Donc la 5ème note est 75 - 60 = 15."
+  },
+  {
+    "id": 3,
+    "theme": "calcul",
+    "difficulty": 1,
+    "statement": "Anna prépare un cocktail de fruits pour lequel elle utilise trois fois plus de jus d'orange que de sirop et deux fois plus de sirop que de jus de citron. Elle a utilisé 4 verres de jus de citron. Combien a-t-elle utilisé de verres de jus d'orange ?",
+    "answer": 24,
+    "explanation": "Jus de citron = 4 verres. Sirop = 2 × 4 = 8 verres. Jus d'orange = 3 × 8 = 24 verres."
+  },
+  {
+    "id": 4,
+    "theme": "geometrie",
+    "difficulty": 1,
+    "statement": "On trace un rectangle de longueur 15 et de largeur 8, puis on trace le cercle passant par les quatre sommets du rectangle. Combien vaut le diamètre du cercle ?",
+    "answer": 17,
+    "explanation": "La diagonale du rectangle est le diamètre du cercle. Par Pythagore : d = √(15² + 8²) = √(225 + 64) = √289 = 17."
+  },
+  {
+    "id": 5,
+    "theme": "arithmetique",
+    "difficulty": 1,
+    "statement": "Combien y a-t-il de carrés parfaits compris entre 1 et 500 (inclus) ?",
+    "answer": 22,
+    "explanation": "On cherche les entiers n tels que n² ≤ 500. Comme 22² = 484 ≤ 500 et 23² = 529 > 500, il y a 22 carrés parfaits."
+  },
+  {
+    "id": 6,
+    "theme": "calcul",
+    "difficulty": 1,
+    "statement": "Pour carreler une pièce de 12m de long et 9m de large, on dispose de carreaux carrés de 60cm de côté. De combien de carreaux a-t-on besoin ?",
+    "answer": 300,
+    "explanation": "12m = 1200cm, 9m = 900cm. Nombre de carreaux en longueur : 1200/60 = 20. En largeur : 900/60 = 15. Total : 20 × 15 = 300."
+  },
+  {
+    "id": 7,
+    "theme": "arithmetique",
+    "difficulty": 1,
+    "statement": "Quel est le plus petit entier strictement positif qui soit multiple de tous les entiers de 1 à 6 (inclus) ?",
+    "answer": 60,
+    "explanation": "On cherche le PPCM(1,2,3,4,5,6). On décompose : 2=2, 3=3, 4=2², 5=5, 6=2×3. PPCM = 2² × 3 × 5 = 60."
+  },
+  {
+    "id": 8,
+    "theme": "combinatoire",
+    "difficulty": 1,
+    "statement": "Hugo possède 42 chaussettes bleues, 55 chaussettes vertes et 38 chaussettes rouges. Toutes sont dans un même tiroir. Combien de chaussettes doit-il prendre au minimum pour être sûr d'avoir deux chaussettes de couleurs différentes ?",
+    "answer": 56,
+    "explanation": "Dans le pire cas, Hugo prend toutes les chaussettes d'une même couleur avant d'en avoir deux différentes. Le pire cas est de prendre les 55 vertes (la plus grande quantité), puis une de plus. Donc 55 + 1 = 56."
+  },
+  {
+    "id": 9,
+    "theme": "calcul",
+    "difficulty": 2,
+    "statement": "La somme de cinq entiers consécutifs vaut 2025. Que vaut le plus grand de ces entiers ?",
+    "answer": 407,
+    "explanation": "Soit n le plus petit. On a n + (n+1) + (n+2) + (n+3) + (n+4) = 5n + 10 = 2025. Donc 5n = 2015, n = 403. Le plus grand est 403 + 4 = 407."
+  },
+  {
+    "id": 10,
+    "theme": "geometrie",
+    "difficulty": 2,
+    "statement": "Soit ABCD un losange de périmètre 40. La diagonale AC mesure 16. Que vaut l'aire du losange ?",
+    "answer": 96,
+    "explanation": "Périmètre = 40 donc côté = 10. Les diagonales se coupent en O. AO = 8. Par Pythagore dans le triangle AOB : OB = √(10² - 8²) = √(100-64) = √36 = 6. Donc BD = 12. Aire = (AC × BD)/2 = (16 × 12)/2 = 96."
+  },
+  {
+    "id": 11,
+    "theme": "arithmetique",
+    "difficulty": 2,
+    "statement": "Combien d'entiers compris entre 1 et 100 (inclus) sont divisibles par 3 ou par 7 ?",
+    "answer": 43,
+    "explanation": "Multiples de 3 : ⌊100/3⌋ = 33. Multiples de 7 : ⌊100/7⌋ = 14. Multiples de 21 (3×7) : ⌊100/21⌋ = 4. Par inclusion-exclusion : 33 + 14 - 4 = 43."
+  },
+  {
+    "id": 12,
+    "theme": "geometrie",
+    "difficulty": 2,
+    "statement": "Soit ABCD un rectangle tel que AD = 6 et AB = 5. Soit E un point de la demi-droite [BC) tel que l'aire du triangle DCE soit égale à l'aire du rectangle ABCD. Que vaut la longueur DE ?",
+    "answer": 13,
+    "explanation": "En coordonnées : D=(0,0), C=(5,0), B=(5,6), A=(0,6). Aire du rectangle = 5 × 6 = 30. E est sur [BC) donc E=(5,t). Aire du triangle DCE = base DC × hauteur / 2 = 5 × t / 2. On veut 5t/2 = 30, donc t = 12. DE = √(5² + 12²) = √(25+144) = √169 = 13."
+  },
+  {
+    "id": 13,
+    "theme": "calcul",
+    "difficulty": 2,
+    "statement": "Léa choisit un nombre positif x, le met au carré et lui soustrait x. Elle obtient 72. Que vaut x + 5 ?",
+    "answer": 14,
+    "explanation": "On a x² - x = 72, soit x² - x - 72 = 0. On factorise : (x - 9)(x + 8) = 0. Comme x > 0, x = 9. Donc x + 5 = 14."
+  },
+  {
+    "id": 14,
+    "theme": "combinatoire",
+    "difficulty": 2,
+    "statement": "On trace 10 droites distinctes dans un plan. Combien de régions délimitent-elles au minimum ?",
+    "answer": 11,
+    "explanation": "Le minimum est obtenu quand toutes les droites sont parallèles. n droites parallèles créent n + 1 régions. Avec 10 droites : 10 + 1 = 11 régions."
+  },
+  {
+    "id": 15,
+    "theme": "arithmetique",
+    "difficulty": 2,
+    "statement": "Le nombre 1/2 × 2/3 × 3/4 × ... × 14/15 s'écrit sous la forme d'une fraction irréductible a/b. Que vaut a + b ?",
+    "answer": 16,
+    "explanation": "C'est un produit télescopique. La plupart des termes se simplifient : (1×2×3×...×14) / (2×3×4×...×15) = 1/15. Donc a = 1, b = 15, et a + b = 16."
+  },
+  {
+    "id": 16,
+    "theme": "geometrie",
+    "difficulty": 2,
+    "statement": "Soit ABC un triangle isocèle en A tel que l'angle BAC = 40°. Que vaut l'angle ABC (en degrés) ?",
+    "answer": 70,
+    "explanation": "Triangle isocèle en A donc AB = AC, et les angles à la base sont égaux : angle ABC = angle ACB. La somme des angles = 180°. Donc 40 + 2 × angle ABC = 180, angle ABC = 70°."
+  },
+  {
+    "id": 17,
+    "theme": "calcul",
+    "difficulty": 2,
+    "statement": "Quelle est la somme des entiers compris entre 1 et 50 qui sont multiples de 4 et/ou de 6 ?",
+    "answer": 408,
+    "explanation": "Multiples de 4 jusqu'à 50 : 4,8,12,...,48 → 12 termes, somme = 12×(4+48)/2 = 312. Multiples de 6 jusqu'à 50 : 6,12,18,...,48 → 8 termes, somme = 8×(6+48)/2 = 216. Multiples de 12 (= PPCM de 4 et 6) jusqu'à 50 : 12,24,36,48 → somme = 120. Par inclusion-exclusion : 312 + 216 - 120 = 408."
+  },
+  {
+    "id": 18,
+    "theme": "geometrie",
+    "difficulty": 2,
+    "statement": "Soit ABC un triangle dans lequel AB < AC et tel que l'angle BCA = 65°. Soit D un point de [AC] tel que DC = DB. Quelle est la mesure (en degrés) de l'angle ADB ?",
+    "answer": 130,
+    "explanation": "Le triangle BDC est isocèle en D (car DC = DB). Donc angle DBC = angle DCB = 65°. La somme des angles du triangle BDC : angle BDC = 180 - 65 - 65 = 50°. L'angle ADB est supplémentaire de l'angle BDC (car D est sur [AC]) : angle ADB = 180 - 50 = 130°."
+  },
+  {
+    "id": 19,
+    "theme": "arithmetique",
+    "difficulty": 3,
+    "statement": "Combien de triplets (a, b, c) d'entiers strictement positifs vérifient a < b < c et abc = 60 ?",
+    "answer": 8,
+    "explanation": "On cherche les factorisations de 60 en 3 facteurs strictement croissants. Les triplets (a,b,c) avec a < b < c et abc = 60 : (1,2,30), (1,3,20), (1,4,15), (1,5,12), (1,6,10), (2,3,10), (2,5,6), (3,4,5). Il y en a 8."
+  },
+  {
+    "id": 20,
+    "theme": "combinatoire",
+    "difficulty": 3,
+    "statement": "Dans un train de 13 wagons, il y a 185 passagers. Si on choisit 3 wagons consécutifs, on compte toujours 43 passagers. Combien y a-t-il de passagers dans le septième wagon ?",
+    "answer": 13,
+    "explanation": "Pour tout i, w_i + w_{i+1} + w_{i+2} = 43, donc w_{i+3} = w_i (en soustrayant deux équations consécutives). La suite est périodique de période 3 : w₁=w₄=w₇=w₁₀=w₁₃, w₂=w₅=w₈=w₁₁, w₃=w₆=w₉=w₁₂. Il y a 5 wagons de type w₁, 4 de type w₂, 4 de type w₃. Total : 5w₁ + 4(w₂+w₃) = 5w₁ + 4(43-w₁) = w₁ + 172 = 185. Donc w₁ = 13. Le 7ème wagon est de type w₁, donc w₇ = 13."
+  },
+  {
+    "id": 21,
+    "theme": "calcul",
+    "difficulty": 3,
+    "statement": "La fraction 321/320 - 320/321 s'écrit sous la forme d'une fraction irréductible a/b. Que vaut a ?",
+    "answer": 641,
+    "explanation": "321/320 - 320/321 = (321² - 320²)/(320 × 321) = (321-320)(321+320)/(320×321) = 641/(320×321). Or 320 = 2⁶ × 5 et 321 = 3 × 107. Comme 641 est premier (il n'est divisible ni par 2, 3, 5, ni 107), la fraction est déjà irréductible. Donc a = 641."
+  },
+  {
+    "id": 22,
+    "theme": "geometrie",
+    "difficulty": 3,
+    "statement": "Un carré ABCD a un côté de 6 cm. E est le milieu de [DC] et F est le point d'intersection des droites (AC) et (BE). Que vaut l'aire du quadrilatère AFED ?",
+    "answer": 15,
+    "explanation": "Plaçons A(0,6), B(6,6), C(6,0), D(0,0). E = milieu de DC = (3,0). Droite (AC) : de A(0,6) à C(6,0), équation y = -x + 6. Droite (BE) : de B(6,6) à E(3,0), pente = (0-6)/(3-6) = 2, équation y - 6 = 2(x-6) → y = 2x - 6. Intersection F : -x + 6 = 2x - 6 → 3x = 12 → x = 4, y = 2. F = (4,2). Aire de AFED avec A(0,6), F(4,2), E(3,0), D(0,0) par la formule du lacet : |0×2 - 4×6 + 4×0 - 3×2 + 3×0 - 0×0 + 0×6 - 0×0|/2 = |-24 - 6|/2 = 30/2 = 15."
+  },
+  {
+    "id": 23,
+    "theme": "arithmetique",
+    "difficulty": 3,
+    "statement": "Combien d'entiers compris entre 100 et 999 ont tous leurs chiffres distincts et forment une suite strictement croissante lus de gauche à droite ?",
+    "answer": 84,
+    "explanation": "Un tel nombre est entièrement déterminé par le choix de 3 chiffres distincts parmi {1,2,...,9} (le premier chiffre ne peut pas être 0 car la suite est croissante et c'est un nombre à 3 chiffres). Il y a C(9,3) = 84 façons de choisir 3 chiffres parmi 9, et chaque choix donne exactement un nombre en les rangeant dans l'ordre croissant."
+  },
+  {
+    "id": 24,
+    "theme": "combinatoire",
+    "difficulty": 3,
+    "statement": "Alice, Baptiste et Clara veulent se partager 10 bonbons identiques de telle sorte que chacun en ait au moins un. Combien de répartitions sont possibles ?",
+    "answer": 36,
+    "explanation": "Chacun doit avoir au moins 1 bonbon. On distribue d'abord 1 bonbon à chacun, il en reste 7 à répartir librement entre 3 personnes. C'est un problème de barres et étoiles : C(7+2, 2) = C(9,2) = 36."
+  },
+  {
+    "id": 25,
+    "theme": "calcul",
+    "difficulty": 3,
+    "statement": "Les réels x et y vérifient x + y = 10 et xy = -11. Que vaut x² + y² ?",
+    "answer": 122,
+    "explanation": "On sait que (x+y)² = x² + 2xy + y². Donc x² + y² = (x+y)² - 2xy = 100 - 2×(-11) = 100 + 22 = 122."
+  },
+  {
+    "id": 26,
+    "theme": "arithmetique",
+    "difficulty": 3,
+    "statement": "Quel est le plus petit entier strictement positif qui soit multiple de tous les entiers compris entre 1 et 10 (inclus) ?",
+    "answer": 2520,
+    "explanation": "PPCM(1,...,10). Décompositions : 2³ (de 8), 3² (de 9), 5 (de 5), 7 (de 7). PPCM = 8 × 9 × 5 × 7 / ... Plus rigoureusement : PPCM = 2³ × 3² × 5 × 7 = 8 × 9 × 5 × 7 = 2520."
+  },
+  {
+    "id": 27,
+    "theme": "geometrie",
+    "difficulty": 3,
+    "statement": "Soit ABCD un carré de côté 12. On place E au tiers de [AB] en partant de A et F au tiers de [BC] en partant de B. Que vaut l'aire du triangle AEF ?",
+    "answer": 8,
+    "explanation": "Plaçons A(0,0), B(12,0), C(12,12), D(0,12). E est au tiers de AB : E=(4,0). F est au tiers de BC : F=(12,4). Aire du triangle AEF = |x_A(y_E-y_F) + x_E(y_F-y_A) + x_F(y_A-y_E)|/2 = |0(0-4) + 4(4-0) + 12(0-0)|/2 = |16|/2 = 8."
+  },
+  {
+    "id": 28,
+    "theme": "geometrie",
+    "difficulty": 3,
+    "statement": "Un triangle rectangle a des côtés de longueurs entières. Si les deux côtés de l'angle droit mesurent 5 et 12, que vaut le périmètre du triangle ?",
+    "answer": 30,
+    "explanation": "L'hypoténuse vaut √(5² + 12²) = √(25 + 144) = √169 = 13. Le périmètre est 5 + 12 + 13 = 30."
+  },
+  {
+    "id": 29,
+    "theme": "calcul",
+    "difficulty": 3,
+    "statement": "On se donne quatre entiers positifs. On en choisit trois dont on calcule la moyenne et on ajoute le quatrième. Les quatre résultats obtenus sont 18, 24, 26 et 28. Quel est le plus grand des quatre entiers ?",
+    "answer": 18,
+    "explanation": "Notons a,b,c,d les quatre entiers et S = a+b+c+d. Le résultat quand on exclut x_i est R_i = (S-x_i)/3 + x_i = S/3 + 2x_i/3. La somme des R_i = 4S/3 + 2S/3 = 2S = 18+24+26+28 = 96, donc S = 48. Le plus grand R correspond au plus grand entier : 28 = 48/3 + 2d/3 = 16 + 2d/3, donc 2d/3 = 12, d = 18."
+  },
+  {
+    "id": 30,
+    "theme": "combinatoire",
+    "difficulty": 4,
+    "statement": "On lance trois dés classiques (à 6 faces). Combien de résultats donnent une somme égale à 10 ?",
+    "answer": 27,
+    "explanation": "On cherche le nombre de triplets (a,b,c) avec 1 ≤ a,b,c ≤ 6 et a+b+c = 10. On pose a'=a-1, b'=b-1, c'=c-1 avec 0 ≤ a',b',c' ≤ 5 et a'+b'+c' = 7. Par dénombrement systématique : si a'=0, b'+c'=7 → (2,5),(3,4),(4,3),(5,2) = 4. Si a'=1, b'+c'=6 → (1,5),(2,4),(3,3),(4,2),(5,1) = 5. Si a'=2, b'+c'=5 → (0,5),(1,4),(2,3),(3,2),(4,1),(5,0) = 6. Si a'=3, b'+c'=4 → (0,4),...,(4,0) mais ≤5, donc 5. Si a'=4, b'+c'=3 → (0,3),...,(3,0) = 4. Si a'=5, b'+c'=2 → (0,2),(1,1),(2,0) = 3. Total = 4+5+6+5+4+3 = 27."
+  },
+  {
+    "id": 31,
+    "theme": "arithmetique",
+    "difficulty": 4,
+    "statement": "Combien d'entiers compris entre 1 et 1000 ne sont divisibles ni par 2, ni par 3, ni par 5 ?",
+    "answer": 266,
+    "explanation": "Par inclusion-exclusion. |div2| = 500, |div3| = 333, |div5| = 200. |div6| = 166, |div10| = 100, |div15| = 66. |div30| = 33. Total divisibles par 2, 3 ou 5 = 500+333+200-166-100-66+33 = 734. Non divisibles : 1000 - 734 = 266."
+  },
+  {
+    "id": 32,
+    "theme": "geometrie",
+    "difficulty": 4,
+    "statement": "Un grand cube formé de 1000 petits cubes est posé sur une table. Combien de ces petits cubes ont au moins une face visible ? (Les faces en contact avec la table ne sont pas visibles)",
+    "answer": 424,
+    "explanation": "Le grand cube est 10×10×10 = 1000 petits cubes. Les 5 faces visibles sont : le dessus et les 4 côtés (le dessous est sur la table). Un cube est invisible s'il n'est sur aucune de ces 5 faces. Invisible : x ∈ {2,...,9} (8 valeurs), y ∈ {2,...,9} (8 valeurs), z ∈ {1,...,9} (9 valeurs, pas le dessus). Total invisible = 8 × 8 × 9 = 576. Visible = 1000 - 576 = 424."
+  },
+  {
+    "id": 33,
+    "theme": "calcul",
+    "difficulty": 4,
+    "statement": "Le nombre (1 + 1/2)(1 + 1/3)(1 + 1/4)...(1 + 1/299) s'écrit sous la forme d'une fraction irréductible a/b. Que vaut a + b ?",
+    "answer": 151,
+    "explanation": "Chaque facteur (1 + 1/k) = (k+1)/k. Le produit est (3/2)(4/3)(5/4)...(300/299). C'est un produit télescopique : tout se simplifie sauf 300 au numérateur et 2 au dénominateur. Résultat = 300/2 = 150 = 150/1. Donc a = 150, b = 1, a + b = 151."
+  },
+  {
+    "id": 34,
+    "theme": "combinatoire",
+    "difficulty": 4,
+    "statement": "Combien y a-t-il de nombres à 4 chiffres (de 1000 à 9999) dont la somme des chiffres vaut 5 ?",
+    "answer": 35,
+    "explanation": "On cherche les quadruplets (a,b,c,d) avec a ≥ 1, b,c,d ≥ 0 et a+b+c+d = 5. On pose a' = a-1 ≥ 0, donc a'+b+c+d = 4. Par barres et étoiles : C(4+3, 3) = C(7,3) = 35."
+  },
+  {
+    "id": 35,
+    "theme": "geometrie",
+    "difficulty": 4,
+    "statement": "On a deux carrés : un grand carré de côté 7 et un petit carré de côté 3 placé dans un coin du grand carré. Que vaut l'aire de la partie du grand carré qui n'est pas recouverte par le petit ?",
+    "answer": 40,
+    "explanation": "Aire du grand carré = 7² = 49. Aire du petit carré = 3² = 9. Aire non recouverte = 49 - 9 = 40."
+  },
+  {
+    "id": 36,
+    "theme": "arithmetique",
+    "difficulty": 4,
+    "statement": "On écrit tous les entiers de 1 à 100. Combien de fois le chiffre 7 apparaît-il au total ?",
+    "answer": 20,
+    "explanation": "Chiffre des unités = 7 : 7, 17, 27, 37, 47, 57, 67, 77, 87, 97 → 10 fois. Chiffre des dizaines = 7 : 70, 71, 72, 73, 74, 75, 76, 77, 78, 79 → 10 fois. Total = 20."
+  },
+  {
+    "id": 37,
+    "theme": "calcul",
+    "difficulty": 4,
+    "statement": "Soit n = 2⁸ × 3⁴. Combien de diviseurs positifs possède n ?",
+    "answer": 45,
+    "explanation": "Si n = p₁^a₁ × p₂^a₂, le nombre de diviseurs est (a₁+1)(a₂+1). Ici n = 2⁸ × 3⁴, donc le nombre de diviseurs est (8+1)(4+1) = 9 × 5 = 45."
+  },
+  {
+    "id": 38,
+    "theme": "combinatoire",
+    "difficulty": 4,
+    "statement": "De combien de manières peut-on monter un escalier de 8 marches si on peut monter 1 ou 2 marches à la fois ?",
+    "answer": 34,
+    "explanation": "C'est la suite de Fibonacci ! Notons f(n) le nombre de façons de monter n marches. f(1)=1, f(2)=2. f(n) = f(n-1) + f(n-2). f(3)=3, f(4)=5, f(5)=8, f(6)=13, f(7)=21, f(8)=34."
+  },
+  {
+    "id": 39,
+    "theme": "geometrie",
+    "difficulty": 4,
+    "statement": "Un carré ABCD de côté 8 contient un cercle inscrit (tangent aux 4 côtés). Que vaut l'aire de la région entre le carré et le cercle ? Donner la partie entière de cette réponse.",
+    "answer": 13,
+    "explanation": "Le cercle inscrit a pour rayon r = 4 (moitié du côté). Aire du carré = 64. Aire du cercle = π × 4² = 16π ≈ 50.27. Aire entre les deux = 64 - 16π ≈ 13.73. Partie entière = 13."
+  },
+  {
+    "id": 40,
+    "theme": "arithmetique",
+    "difficulty": 5,
+    "statement": "Soit n = 9²⁰⁰. Le nombre n/3 peut s'écrire sous la forme 3ᵃ. Que vaut a ?",
+    "answer": 399,
+    "explanation": "n = 9²⁰⁰ = (3²)²⁰⁰ = 3⁴⁰⁰. Donc n/3 = 3⁴⁰⁰/3 = 3³⁹⁹. Ainsi a = 399."
+  },
+  {
+    "id": 41,
+    "theme": "combinatoire",
+    "difficulty": 5,
+    "statement": "Aurélien, Béa, Camille et Damien veulent se partager une pizza prédécoupée en 10 morceaux, de telle sorte que chacun ait au moins une part. Combien de répartitions sont possibles ?",
+    "answer": 84,
+    "explanation": "On distribue 1 part à chacun d'abord, il reste 6 parts à répartir entre 4 personnes. Par barres et étoiles : C(6+3, 3) = C(9,3) = 84."
+  },
+  {
+    "id": 42,
+    "theme": "calcul",
+    "difficulty": 5,
+    "statement": "Les réels x et y vérifient x + y = 12 et xy = -28. Que vaut (x - y)² ?",
+    "answer": 256,
+    "explanation": "(x-y)² = (x+y)² - 4xy = 144 - 4×(-28) = 144 + 112 = 256."
+  },
+  {
+    "id": 43,
+    "theme": "geometrie",
+    "difficulty": 5,
+    "statement": "Soit ABCD un trapèze rectangle en A et D, avec AB = 12, CD = 5 et AD = 8. Que vaut l'aire du trapèze ?",
+    "answer": 68,
+    "explanation": "C'est un trapèze rectangle, les bases sont AB = 12 et CD = 5, la hauteur est AD = 8. Aire = (AB + CD) × AD / 2 = (12 + 5) × 8 / 2 = 17 × 4 = 68."
+  },
+  {
+    "id": 44,
+    "theme": "arithmetique",
+    "difficulty": 5,
+    "statement": "Quel est le plus petit entier positif n tel que n! (factorielle de n) soit divisible par 1000 ?",
+    "answer": 15,
+    "explanation": "1000 = 2³ × 5³. Il faut que n! contienne au moins trois facteurs 5 et trois facteurs 2. La puissance de 5 dans n! est ⌊n/5⌋ + ⌊n/25⌋ + ... Pour n=14 : ⌊14/5⌋ = 2, pas assez. Pour n=15 : ⌊15/5⌋ = 3, suffisant. La puissance de 2 est toujours ≥ 3 pour n ≥ 4. Donc n = 15."
+  },
+  {
+    "id": 45,
+    "theme": "combinatoire",
+    "difficulty": 5,
+    "statement": "On écrit les entiers de 1 à 50. Combien d'entre eux s'écrivent avec exactement deux chiffres identiques ?",
+    "answer": 4,
+    "explanation": "Les nombres de 1 à 50 qui ont deux chiffres identiques : 11, 22, 33, 44. (55 > 50). Donc 4 nombres."
+  },
+  {
+    "id": 46,
+    "theme": "calcul",
+    "difficulty": 2,
+    "statement": "Trois amis se partagent une somme d'argent. Le premier reçoit le double du deuxième, et le troisième reçoit 30 € de moins que le premier. Si le deuxième reçoit 45 €, quelle est la somme totale partagée ?",
+    "answer": 195,
+    "explanation": "Deuxième = 45 €. Premier = 2 × 45 = 90 €. Troisième = 90 - 30 = 60 €. Total = 90 + 45 + 60 = 195 €."
+  },
+  {
+    "id": 47,
+    "theme": "geometrie",
+    "difficulty": 2,
+    "statement": "Un rectangle a un périmètre de 34 cm et une longueur qui fait 5 cm de plus que sa largeur. Que vaut l'aire du rectangle (en cm²) ?",
+    "answer": 66,
+    "explanation": "Soit l la largeur. Longueur = l + 5. Périmètre = 2(l + l + 5) = 4l + 10 = 34. Donc 4l = 24, l = 6. Longueur = 11. Aire = 6 × 11 = 66 cm²."
+  },
+  {
+    "id": 48,
+    "theme": "arithmetique",
+    "difficulty": 3,
+    "statement": "Combien de nombres premiers y a-t-il entre 1 et 50 ?",
+    "answer": 15,
+    "explanation": "Les nombres premiers ≤ 50 sont : 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47. Il y en a 15."
+  },
+  {
+    "id": 49,
+    "theme": "combinatoire",
+    "difficulty": 3,
+    "statement": "Combien de nombres de 3 chiffres peut-on former avec les chiffres 1, 2, 3, 4 et 5 si les répétitions ne sont pas autorisées ?",
+    "answer": 60,
+    "explanation": "Premier chiffre : 5 choix. Deuxième : 4 choix. Troisième : 3 choix. Total = 5 × 4 × 3 = 60."
+  },
+  {
+    "id": 50,
+    "theme": "calcul",
+    "difficulty": 4,
+    "statement": "Combien vaut la somme 1 + 2 + 3 + ... + 99 + 100 ?",
+    "answer": 5050,
+    "explanation": "Formule de Gauss : n(n+1)/2 = 100 × 101 / 2 = 5050. Astuce : on regroupe les termes par paires : (1+100) + (2+99) + ... + (50+51) = 50 × 101 = 5050."
+  },
+  {
+    "id": 51,
+    "theme": "geometrie",
+    "difficulty": 1,
+    "statement": "Un triangle rectangle a un angle de 90° et un autre de 35°. Que vaut le troisième angle (en degrés) ?",
+    "answer": 55,
+    "explanation": "La somme des angles d'un triangle = 180°. Le troisième angle = 180 - 90 - 35 = 55°."
+  },
+  {
+    "id": 52,
+    "theme": "calcul",
+    "difficulty": 1,
+    "statement": "Un magasin propose une réduction de 20% sur un article qui coûte 80 €. Quel est le nouveau prix en euros ?",
+    "answer": 64,
+    "explanation": "Réduction = 20% de 80 = 16 €. Nouveau prix = 80 - 16 = 64 €."
+  },
+  {
+    "id": 53,
+    "theme": "arithmetique",
+    "difficulty": 2,
+    "statement": "Quel est le PGCD de 84 et 126 ?",
+    "answer": 42,
+    "explanation": "Par l'algorithme d'Euclide : 126 = 1 × 84 + 42. 84 = 2 × 42 + 0. Donc PGCD(84, 126) = 42."
+  },
+  {
+    "id": 54,
+    "theme": "combinatoire",
+    "difficulty": 2,
+    "statement": "De combien de façons peut-on choisir 2 délégués parmi 8 élèves ?",
+    "answer": 28,
+    "explanation": "C'est une combinaison : C(8,2) = 8!/(2! × 6!) = (8 × 7)/2 = 28."
+  },
+  {
+    "id": 55,
+    "theme": "calcul",
+    "difficulty": 3,
+    "statement": "Un nombre à deux chiffres est tel que le chiffre des dizaines est le triple du chiffre des unités. Si on inverse les deux chiffres, on obtient un nombre inférieur de 36. Quel est ce nombre ?",
+    "answer": 62,
+    "explanation": "Soit u le chiffre des unités et d = 3u le chiffre des dizaines. Le nombre est 10d + u = 30u + u = 31u. Le nombre inversé est 10u + d = 10u + 3u = 13u. Différence : 31u - 13u = 18u = 36, donc u = 2. Le nombre est 31 × 2 = 62."
+  },
+  {
+    "id": 56,
+    "theme": "geometrie",
+    "difficulty": 3,
+    "statement": "Dans un repère, les points A(1,2), B(7,2) et C(4,8) forment un triangle. Que vaut l'aire de ce triangle ?",
+    "answer": 18,
+    "explanation": "Base AB = 7 - 1 = 6 (horizontale). Hauteur = distance de C à la droite AB (y=2) = 8 - 2 = 6. Aire = 6 × 6 / 2 = 18."
+  },
+  {
+    "id": 57,
+    "theme": "arithmetique",
+    "difficulty": 4,
+    "statement": "Combien de zéros y a-t-il à la fin de 25! (factorielle de 25) ?",
+    "answer": 6,
+    "explanation": "Le nombre de zéros terminaux est donné par la puissance de 5 dans la factorielle. ⌊25/5⌋ + ⌊25/25⌋ = 5 + 1 = 6."
+  },
+  {
+    "id": 58,
+    "theme": "combinatoire",
+    "difficulty": 4,
+    "statement": "On dispose de pièces de 1€, 2€ et 5€. De combien de façons peut-on faire 10€ ?",
+    "answer": 10,
+    "explanation": "On note (a,b,c) le nombre de pièces de 1€, 2€, 5€. a + 2b + 5c = 10. Si c=2: a+2b=0, (0,0,2). Si c=1: a+2b=5, b peut être 0,1,2 → (5,0,1),(3,1,1),(1,2,1). Si c=0: a+2b=10, b peut être 0,1,2,3,4,5 → (10,0,0),(8,1,0),(6,2,0),(4,3,0),(2,4,0),(0,5,0). Total = 1+3+6 = 10."
+  },
+  {
+    "id": 59,
+    "theme": "calcul",
+    "difficulty": 5,
+    "statement": "Que vaut la somme 1² + 2² + 3² + ... + 10² ?",
+    "answer": 385,
+    "explanation": "Formule : n(n+1)(2n+1)/6 = 10 × 11 × 21 / 6 = 2310/6 = 385. On peut aussi calculer directement : 1+4+9+16+25+36+49+64+81+100 = 385."
+  },
+  {
+    "id": 60,
+    "theme": "geometrie",
+    "difficulty": 5,
+    "statement": "Un rectangle ABCD a pour dimensions AB = 9 et BC = 12. On trace les deux diagonales AC et BD qui se coupent en O. Que vaut l'aire du triangle AOB ?",
+    "answer": 27,
+    "explanation": "Les diagonales d'un rectangle se coupent en leur milieu et divisent le rectangle en 4 triangles de même aire. Aire du rectangle = 9 × 12 = 108. Aire de AOB = 108/4 = 27."
+  }
+]

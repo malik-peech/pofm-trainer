@@ -4,6 +4,7 @@ import sqlite3
 import os
 from datetime import datetime
 from flask import Flask, render_template, jsonify, request
+from generator import generate_exercise, generate_exam as gen_exam
 
 app = Flask(__name__)
 DB_PATH = os.path.join(os.path.dirname(__file__), "pofm.db")
@@ -50,6 +51,9 @@ def load_exercises():
 
 init_db()
 
+# Cache des exercices generes (pour pouvoir verifier les reponses)
+exercise_cache = {}
+
 
 @app.route("/")
 def index():
@@ -58,20 +62,16 @@ def index():
 
 @app.route("/api/exercise/random")
 def random_exercise():
-    exercises = load_exercises()
     theme = request.args.get("theme")
     difficulty = request.args.get("difficulty", type=int)
 
-    filtered = exercises
-    if theme and theme != "all":
-        filtered = [e for e in filtered if e["theme"] == theme]
-    if difficulty and difficulty > 0:
-        filtered = [e for e in filtered if e["difficulty"] == difficulty]
+    ex = generate_exercise(theme=theme, difficulty=difficulty)
+    if not ex:
+        return jsonify({"error": "Aucun exercice trouve"}), 404
 
-    if not filtered:
-        return jsonify({"error": "Aucun exercice trouvé"}), 404
+    # Stocker dans le cache pour la verification
+    exercise_cache[ex["id"]] = ex
 
-    ex = random.choice(filtered)
     return jsonify({
         "id": ex["id"],
         "theme": ex["theme"],
@@ -81,43 +81,25 @@ def random_exercise():
 
 
 @app.route("/api/exam/generate")
-def generate_exam():
-    exercises = load_exercises()
+def generate_exam_route():
     session_id = datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(100, 999))
+    exercises = gen_exam(25)
 
-    # Select 25 exercises with increasing difficulty like real POFM
-    by_diff = {1: [], 2: [], 3: [], 4: [], 5: []}
+    # Stocker dans le cache
     for ex in exercises:
-        by_diff[ex["difficulty"]].append(ex)
-
-    selected = []
-    targets = {1: 5, 2: 6, 3: 6, 4: 5, 5: 3}  # 5+6+6+5+3 = 25
-
-    for diff, count in targets.items():
-        pool = by_diff[diff]
-        random.shuffle(pool)
-        selected.extend(pool[:count])
-
-    # If not enough exercises in some categories, fill from others
-    if len(selected) < 25:
-        remaining = [e for e in exercises if e not in selected]
-        random.shuffle(remaining)
-        selected.extend(remaining[:25 - len(selected)])
-
-    # Sort by difficulty
-    selected.sort(key=lambda e: (e["difficulty"], random.random()))
+        exercise_cache[ex["id"]] = ex
 
     # Save session
     conn = get_db()
     conn.execute(
         "INSERT INTO exam_sessions (id, total) VALUES (?, ?)",
-        (session_id, len(selected))
+        (session_id, len(exercises))
     )
     conn.commit()
     conn.close()
 
     exam_exercises = []
-    for i, ex in enumerate(selected, 1):
+    for i, ex in enumerate(exercises, 1):
         exam_exercises.append({
             "num": i,
             "id": ex["id"],
@@ -129,7 +111,7 @@ def generate_exam():
     return jsonify({
         "session_id": session_id,
         "exercises": exam_exercises,
-        "total": len(selected)
+        "total": len(exercises)
     })
 
 
@@ -141,8 +123,13 @@ def submit_answer():
     mode = data.get("mode", "individual")
     session_id = data.get("session_id")
 
-    exercises = load_exercises()
-    exercise = next((e for e in exercises if e["id"] == exercise_id), None)
+    # Chercher dans le cache (exercices generes)
+    exercise = exercise_cache.get(exercise_id)
+
+    # Fallback sur la banque statique
+    if not exercise:
+        exercises = load_exercises()
+        exercise = next((e for e in exercises if e["id"] == exercise_id), None)
 
     if not exercise:
         return jsonify({"error": "Exercice introuvable"}), 404

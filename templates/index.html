@@ -328,15 +328,24 @@
         const pts = correct ? (isRetry ? currentExercise.difficulty * 0.25 : currentExercise.difficulty) : 0;
         const r = document.getElementById('ex-result');
         r.style.display = 'block';
-        r.className = 'result-area ' + (correct ? 'correct' : 'incorrect');
-        r.innerHTML = `<div class="result-header">${correct ? (isRetry ? 'Bravo (2eme essai) !' : 'Bravo !') : 'Pas tout a fait...'}</div>
-            <div class="result-answer">${correct ? '' : `Ta reponse : ${answer} | `}Bonne reponse : <strong>${currentExercise.answer}</strong></div>
-            ${correct ? `<div class="result-points">+${pts} point${pts>1?'s':''}</div>` : ''}
-            <div class="result-explanation"><strong>Explication :</strong> ${currentExercise.explanation}</div>
-            <div class="result-buttons">
-                <button class="btn btn-bookmark" onclick="bookmarkExercise(this)">&#9733; A revoir ce soir</button>
-                ${!correct && !isRetry ? `<button class="btn btn-retry" onclick="retryExercise()">&#8635; Reessayer (25% des points)</button>` : ''}
-            </div>`;
+        if (!correct && !isRetry) {
+            // First failure: propose retry WITHOUT showing answer
+            r.className = 'result-area incorrect';
+            r.innerHTML = `<div class="result-header">Pas tout a fait...</div>
+                <div class="result-answer">Ta reponse : ${answer} - ce n'est pas la bonne.</div>
+                <div class="result-buttons">
+                    <button class="btn btn-retry" onclick="retryExercise()">&#8635; Reessayer (25% des points)</button>
+                    <button class="btn btn-secondary" onclick="showAnswer()">Voir la reponse</button>
+                </div>`;
+        } else {
+            // Correct, or retry result, or chose to see answer: show everything
+            r.className = 'result-area ' + (correct ? 'correct' : 'incorrect');
+            r.innerHTML = `<div class="result-header">${correct ? (isRetry ? 'Bravo (2eme essai) !' : 'Bravo !') : 'Rate...'}</div>
+                <div class="result-answer">${correct ? '' : `Ta reponse : ${answer} | `}Bonne reponse : <strong>${currentExercise.answer}</strong></div>
+                ${correct ? `<div class="result-points">+${pts} point${pts>1?'s':''}</div>` : ''}
+                <div class="result-explanation"><strong>Explication :</strong> ${currentExercise.explanation}</div>
+                <button class="btn btn-bookmark" onclick="bookmarkExercise(this)">&#9733; A revoir ce soir</button>`;
+        }
     }
 
     function retryExercise() {
@@ -344,6 +353,15 @@
         document.getElementById('ex-answer').value = '';
         document.getElementById('ex-result').style.display = 'none';
         document.getElementById('ex-answer').focus();
+    }
+
+    function showAnswer() {
+        const r = document.getElementById('ex-result');
+        r.className = 'result-area incorrect';
+        r.innerHTML = `<div class="result-header">Voici la correction</div>
+            <div class="result-answer">Bonne reponse : <strong>${currentExercise.answer}</strong></div>
+            <div class="result-explanation"><strong>Explication :</strong> ${currentExercise.explanation}</div>
+            <button class="btn btn-bookmark" onclick="bookmarkExercise(this)">&#9733; A revoir ce soir</button>`;
     }
 
     // ===== EXAM =====

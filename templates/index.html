@@ -306,18 +306,21 @@
         if (!currentExercise) return;
         const answer = parseInt(document.getElementById('ex-answer').value);
         if (isNaN(answer)) { alert('Entre un nombre entier !'); return; }
-        const res = await fetch('/api/submit', {
-            method: 'POST', headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({exercise_id: currentExercise.id, answer, mode:'individual', user: currentUser})
+        const correct = answer === currentExercise.answer;
+        // Record stats on server
+        fetch('/api/submit', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({exercise_id:currentExercise.id, answer, correct_answer:currentExercise.answer,
+                theme:currentExercise.theme, difficulty:currentExercise.difficulty, mode:'individual', user:currentUser})
         });
-        const data = await res.json();
-        lastSubmitData = {statement:currentExercise.statement, theme:currentExercise.theme, difficulty:currentExercise.difficulty, correct_answer:data.correct_answer, explanation:data.explanation, user_answer:data.your_answer};
+        lastSubmitData = {statement:currentExercise.statement, theme:currentExercise.theme, difficulty:currentExercise.difficulty,
+            correct_answer:currentExercise.answer, explanation:currentExercise.explanation, user_answer:answer};
         const r = document.getElementById('ex-result');
         r.style.display = 'block';
-        r.className = 'result-area ' + (data.correct ? 'correct' : 'incorrect');
-        r.innerHTML = `<div class="result-header">${data.correct ? 'Bravo !' : 'Pas tout a fait...'}</div>
-            <div class="result-answer">${data.correct ? '' : `Ta reponse : ${data.your_answer} | `}Bonne reponse : <strong>${data.correct_answer}</strong></div>
-            <div class="result-explanation"><strong>Explication :</strong> ${data.explanation}</div>
+        r.className = 'result-area ' + (correct ? 'correct' : 'incorrect');
+        r.innerHTML = `<div class="result-header">${correct ? 'Bravo !' : 'Pas tout a fait...'}</div>
+            <div class="result-answer">${correct ? '' : `Ta reponse : ${answer} | `}Bonne reponse : <strong>${currentExercise.answer}</strong></div>
+            <div class="result-explanation"><strong>Explication :</strong> ${currentExercise.explanation}</div>
             <button class="btn btn-bookmark" onclick="bookmarkExercise(this)">&#9733; A revoir ce soir</button>`;
     }
 
@@ -367,21 +370,24 @@
         const ex = examData.exercises[examIndex];
         const answer = parseInt(document.getElementById('exam-ex-answer').value);
         if (isNaN(answer)) { alert('Entre un nombre entier !'); return; }
-        const res = await fetch('/api/submit', {
+        const correct = answer === ex.answer;
+        if (correct) examScore++;
+        // Record stats
+        fetch('/api/submit', {
             method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({exercise_id:ex.id, answer, mode:'exam', session_id:examData.session_id, user:currentUser})
+            body: JSON.stringify({exercise_id:ex.id, answer, correct_answer:ex.answer,
+                theme:ex.theme, difficulty:ex.difficulty, mode:'exam', session_id:examData.session_id, user:currentUser})
         });
-        const data = await res.json();
-        if (data.correct) examScore++;
         document.getElementById('exam-score').textContent = examScore;
         const r = document.getElementById('exam-ex-result');
         r.style.display = 'block';
-        r.className = 'result-area ' + (data.correct ? 'correct' : 'incorrect');
-        r.innerHTML = `<div class="result-header">${data.correct ? 'Correct !' : 'Incorrect'}</div>
-            <div class="result-answer">${data.correct ? '' : `Ta reponse : ${data.your_answer} | `}Reponse : <strong>${data.correct_answer}</strong></div>
-            <div class="result-explanation"><strong>Explication :</strong> ${data.explanation}</div>
+        r.className = 'result-area ' + (correct ? 'correct' : 'incorrect');
+        r.innerHTML = `<div class="result-header">${correct ? 'Correct !' : 'Incorrect'}</div>
+            <div class="result-answer">${correct ? '' : `Ta reponse : ${answer} | `}Reponse : <strong>${ex.answer}</strong></div>
+            <div class="result-explanation"><strong>Explication :</strong> ${ex.explanation}</div>
             <button class="btn btn-bookmark" onclick="bookmarkExamExercise(this,${examIndex})">&#9733; A revoir</button>`;
-        examData.exercises[examIndex]._submitData = {statement:ex.statement, theme:ex.theme, difficulty:ex.difficulty, correct_answer:data.correct_answer, explanation:data.explanation, user_answer:data.your_answer};
+        examData.exercises[examIndex]._submitData = {statement:ex.statement, theme:ex.theme, difficulty:ex.difficulty,
+            correct_answer:ex.answer, explanation:ex.explanation, user_answer:answer};
         document.getElementById('exam-next-btn').style.display = 'block';
         document.getElementById('exam-next-btn').textContent = examIndex < examData.total-1 ? 'Suivant' : 'Terminer';
     }
@@ -389,7 +395,7 @@
     function skipExamQuestion() {
         const ex = examData.exercises[examIndex];
         fetch('/api/submit', {method:'POST', headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({exercise_id:ex.id,answer:null,mode:'exam',session_id:examData.session_id,user:currentUser})});
+            body:JSON.stringify({exercise_id:ex.id,answer:null,correct_answer:ex.answer,theme:ex.theme,difficulty:ex.difficulty,mode:'exam',session_id:examData.session_id,user:currentUser})});
         if (examIndex < examData.total-1) { examIndex++; showExamQuestion(); } else finishExam();
     }
 

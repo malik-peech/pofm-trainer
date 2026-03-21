@@ -122,12 +122,13 @@ def random_exercise():
     if not ex:
         return jsonify({"error": "Aucun exercice trouve"}), 404
 
-    store_exercise(ex)
     return jsonify({
         "id": ex["id"],
         "theme": ex["theme"],
         "difficulty": ex["difficulty"],
-        "statement": ex["statement"]
+        "statement": ex["statement"],
+        "answer": ex["answer"],
+        "explanation": ex["explanation"]
     })
 
 
@@ -136,9 +137,6 @@ def generate_exam_route():
     session_id = datetime.now().strftime("%Y%m%d%H%M%S") + str(random.randint(100, 999))
     user_id = request.args.get("user", "alia")
     exercises = gen_exam(25)
-
-    for ex in exercises:
-        store_exercise(ex)
 
     conn = get_db()
     conn.execute(
@@ -152,7 +150,8 @@ def generate_exam_route():
         "session_id": session_id,
         "exercises": [
             {"num": i, "id": ex["id"], "theme": ex["theme"],
-             "difficulty": ex["difficulty"], "statement": ex["statement"]}
+             "difficulty": ex["difficulty"], "statement": ex["statement"],
+             "answer": ex["answer"], "explanation": ex["explanation"]}
             for i, ex in enumerate(exercises, 1)
         ],
         "total": len(exercises)
@@ -162,26 +161,23 @@ def generate_exam_route():
 @app.route("/api/submit", methods=["POST"])
 def submit_answer():
     data = request.json
-    exercise_id = data.get("exercise_id")
     user_answer = data.get("answer")
+    correct_answer = data.get("correct_answer")
     mode = data.get("mode", "individual")
     session_id = data.get("session_id")
     user_id = data.get("user", "alia")
+    theme = data.get("theme", "")
+    difficulty = data.get("difficulty", 1)
 
-    exercise = find_exercise(exercise_id)
-
-    if not exercise:
-        return jsonify({"error": "Exercice introuvable"}), 404
-
-    is_correct = user_answer == exercise["answer"]
+    is_correct = user_answer == correct_answer
 
     conn = get_db()
     conn.execute(
         """INSERT INTO results
            (user_id, exercise_id, theme, difficulty, user_answer, correct_answer, is_correct, mode, session_id)
            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-        (user_id, exercise_id, exercise["theme"], exercise["difficulty"],
-         user_answer, exercise["answer"], is_correct, mode, session_id)
+        (user_id, data.get("exercise_id", 0), theme, difficulty,
+         user_answer, correct_answer, is_correct, mode, session_id)
     )
     if session_id and is_correct:
         conn.execute(
@@ -191,12 +187,7 @@ def submit_answer():
     conn.commit()
     conn.close()
 
-    return jsonify({
-        "correct": is_correct,
-        "correct_answer": exercise["answer"],
-        "explanation": exercise["explanation"],
-        "your_answer": user_answer
-    })
+    return jsonify({"correct": is_correct})
 
 
 @app.route("/api/exam/finish", methods=["POST"])

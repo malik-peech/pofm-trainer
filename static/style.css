@@ -558,6 +558,30 @@ main {
     font-size: 0.95rem;
 }
 
+/* POINTS & RETRY */
+.stat-points { font-size: 1.1rem; color: var(--primary); font-weight: 600; margin-top: 0.5rem; }
+.result-points { color: var(--success); font-weight: 700; font-size: 1rem; margin: 0.25rem 0; }
+.result-buttons { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1rem; }
+.btn-retry {
+    background: #ede9fe; color: #6d28d9; border: 1px solid #c4b5fd;
+    padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer;
+    font-size: 0.9rem; font-weight: 500; transition: all 0.2s;
+}
+.btn-retry:hover { background: #ddd6fe; }
+
+/* ACTIVITY LOG */
+.activity-row {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.4rem 0.5rem; border-radius: 6px; margin-bottom: 0.25rem;
+    font-size: 0.85rem; flex-wrap: wrap;
+}
+.activity-row:nth-child(odd) { background: #f8fafc; }
+.act-date { color: var(--text-muted); width: 100px; flex-shrink: 0; font-family: monospace; font-size: 0.8rem; }
+.act-who { font-weight: 600; width: 50px; flex-shrink: 0; }
+.act-result { margin-left: auto; font-weight: 500; }
+.act-ok .act-result { color: var(--success); }
+.act-fail .act-result { color: var(--danger); }
+
 /* RESPONSIVE */
 @media (max-width: 600px) {
     header h1 { font-size: 1.5rem; }

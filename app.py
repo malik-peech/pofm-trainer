@@ -28,7 +28,7 @@ def init_db():
     try:
         row = conn.execute("PRAGMA table_info(results)").fetchall()
         cols = [r[1] for r in row]
-        if 'user_id' not in cols:
+        if 'user_id' not in cols or 'points' not in cols:
             conn.executescript("DROP TABLE IF EXISTS results; DROP TABLE IF EXISTS exam_sessions; DROP TABLE IF EXISTS bookmarks; DROP TABLE IF EXISTS exercise_store;")
     except Exception:
         pass
@@ -42,6 +42,8 @@ def init_db():
             user_answer INTEGER,
             correct_answer INTEGER NOT NULL,
             is_correct BOOLEAN NOT NULL,
+            is_retry BOOLEAN NOT NULL DEFAULT 0,
+            points REAL NOT NULL DEFAULT 0,
             mode TEXT NOT NULL,
             session_id TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -176,16 +178,21 @@ def submit_answer():
     user_id = data.get("user", "alia")
     theme = data.get("theme", "")
     difficulty = data.get("difficulty", 1)
+    is_retry = data.get("is_retry", False)
 
     is_correct = user_answer == correct_answer
+    # Points: difficulty value if correct, 25% on retry
+    points = 0
+    if is_correct:
+        points = difficulty * (0.25 if is_retry else 1)
 
     conn = get_db()
     conn.execute(
         """INSERT INTO results
-           (user_id, exercise_id, theme, difficulty, user_answer, correct_answer, is_correct, mode, session_id)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+           (user_id, exercise_id, theme, difficulty, user_answer, correct_answer, is_correct, is_retry, points, mode, session_id)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (user_id, data.get("exercise_id", 0), theme, difficulty,
-         user_answer, correct_answer, is_correct, mode, session_id)
+         user_answer, correct_answer, is_correct, is_retry, points, mode, session_id)
     )
     if session_id and is_correct:
         conn.execute(
@@ -195,7 +202,7 @@ def submit_answer():
     conn.commit()
     conn.close()
 
-    return jsonify({"correct": is_correct})
+    return jsonify({"correct": is_correct, "points": points})
 
 
 @app.route("/api/exam/finish", methods=["POST"])
@@ -253,10 +260,10 @@ def get_stats():
         {exam_where} ORDER BY started_at DESC LIMIT 10
     """, params).fetchall()
 
-    # Daily points: each exercise gives points based on difficulty
-    daily = conn.execute(f"""
+    # Daily points
+    daily = conn.execute("""
         SELECT DATE(created_at) as day, user_id,
-               SUM(CASE WHEN is_correct THEN difficulty ELSE 0 END) as points,
+               SUM(points) as points,
                COUNT(*) as total_exos,
                SUM(CASE WHEN is_correct THEN 1 ELSE 0 END) as correct_exos
         FROM results
@@ -264,13 +271,29 @@ def get_stats():
         ORDER BY day ASC
     """).fetchall()
 
+    # Activity log (last 50)
+    log_where = "WHERE user_id = ?" if user_id else ""
+    log_params = (user_id,) if user_id else ()
+    activity = conn.execute(f"""
+        SELECT user_id, theme, difficulty, is_correct, is_retry, points, created_at
+        FROM results {log_where}
+        ORDER BY created_at DESC LIMIT 50
+    """, log_params).fetchall()
+
+    # Total points per user
+    total_points_q = conn.execute(f"""
+        SELECT SUM(points) as pts FROM results {where}
+    """, params).fetchone()
+    total_points = total_points_q["pts"] or 0
+
     conn.close()
 
     return jsonify({
         "global": {
             "total": total,
             "correct": correct,
-            "percentage": round(correct / total * 100, 1) if total > 0 else 0
+            "percentage": round(correct / total * 100, 1) if total > 0 else 0,
+            "points": round(total_points, 1)
         },
         "by_theme": [
             {"theme": r["theme"], "total": r["total"], "correct": r["correct"],
@@ -288,9 +311,15 @@ def get_stats():
             for r in exams
         ],
         "daily": [
-            {"day": r["day"], "user": r["user_id"], "points": r["points"],
+            {"day": r["day"], "user": r["user_id"], "points": r["points"] or 0,
              "total_exos": r["total_exos"], "correct_exos": r["correct_exos"]}
             for r in daily
+        ],
+        "activity": [
+            {"user": r["user_id"], "theme": r["theme"], "difficulty": r["difficulty"],
+             "correct": bool(r["is_correct"]), "retry": bool(r["is_retry"]),
+             "points": r["points"] or 0, "date": r["created_at"]}
+            for r in activity
         ]
     })
 

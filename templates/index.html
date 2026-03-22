@@ -228,6 +228,52 @@
     const themeLabels = {calcul:'Calcul', geometrie:'Geometrie', arithmetique:'Arithmetique', combinatoire:'Combinatoire'};
     const pages = ['home','exercise','exam','review','stats','dashboard'];
 
+    // ===== SAFE SUBMIT with retry + localStorage fallback =====
+    async function safeSubmit(data) {
+        const maxRetries = 3;
+        for (let attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                const res = await fetch('/api/submit', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                if (res.ok) {
+                    // Flush any queued submissions
+                    flushPendingSubmits();
+                    return await res.json();
+                }
+                console.warn(`Submit attempt ${attempt+1} failed: ${res.status}`);
+            } catch (e) {
+                console.warn(`Submit attempt ${attempt+1} error:`, e);
+            }
+            if (attempt < maxRetries - 1) await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+        }
+        // All retries failed: save to localStorage for later
+        const pending = JSON.parse(localStorage.getItem('pofm_pending_submits') || '[]');
+        pending.push(data);
+        localStorage.setItem('pofm_pending_submits', JSON.stringify(pending));
+        console.warn('Submit saved to localStorage for later sync');
+        return null;
+    }
+
+    async function flushPendingSubmits() {
+        const pending = JSON.parse(localStorage.getItem('pofm_pending_submits') || '[]');
+        if (pending.length === 0) return;
+        const remaining = [];
+        for (const data of pending) {
+            try {
+                const res = await fetch('/api/submit', {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                if (!res.ok) remaining.push(data);
+            } catch (e) { remaining.push(data); }
+        }
+        localStorage.setItem('pofm_pending_submits', JSON.stringify(remaining));
+        if (remaining.length === 0) console.log('All pending submits flushed!');
+        else console.warn(`${remaining.length} submits still pending`);
+    }
+
     // ===== LOGIN =====
     function login(userId) {
         currentUser = userId;
@@ -235,6 +281,8 @@
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app').style.display = 'block';
         setupApp();
+        // Flush any pending submissions from failed saves
+        flushPendingSubmits();
     }
 
     function logout() {
@@ -319,12 +367,9 @@
         const isRetry = currentExercise._isRetry || false;
         lastSubmitData = {statement:currentExercise.statement, theme:currentExercise.theme, difficulty:currentExercise.difficulty,
             correct_answer:currentExercise.answer, explanation:currentExercise.explanation, user_answer:answer};
-        // Record stats
-        fetch('/api/submit', {
-            method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({exercise_id:currentExercise.id, answer, correct_answer:currentExercise.answer,
-                theme:currentExercise.theme, difficulty:currentExercise.difficulty, mode:'individual', user:currentUser, is_retry:isRetry})
-        });
+        // Record stats (with retry + localStorage fallback)
+        await safeSubmit({exercise_id:currentExercise.id, answer, correct_answer:currentExercise.answer,
+            theme:currentExercise.theme, difficulty:currentExercise.difficulty, mode:'individual', user:currentUser, is_retry:isRetry});
         const pts = correct ? (isRetry ? currentExercise.difficulty * 0.25 : currentExercise.difficulty) : 0;
         const r = document.getElementById('ex-result');
         r.style.display = 'block';
@@ -412,12 +457,9 @@
         if (isNaN(answer)) { alert('Entre un nombre entier !'); return; }
         const correct = answer === ex.answer;
         if (correct) examScore++;
-        // Record stats
-        fetch('/api/submit', {
-            method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({exercise_id:ex.id, answer, correct_answer:ex.answer,
-                theme:ex.theme, difficulty:ex.difficulty, mode:'exam', session_id:examData.session_id, user:currentUser})
-        });
+        // Record stats (with retry + localStorage fallback)
+        await safeSubmit({exercise_id:ex.id, answer, correct_answer:ex.answer,
+            theme:ex.theme, difficulty:ex.difficulty, mode:'exam', session_id:examData.session_id, user:currentUser});
         document.getElementById('exam-score').textContent = examScore;
         const r = document.getElementById('exam-ex-result');
         r.style.display = 'block';
@@ -432,10 +474,9 @@
         document.getElementById('exam-next-btn').textContent = examIndex < examData.total-1 ? 'Suivant' : 'Terminer';
     }
 
-    function skipExamQuestion() {
+    async function skipExamQuestion() {
         const ex = examData.exercises[examIndex];
-        fetch('/api/submit', {method:'POST', headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({exercise_id:ex.id,answer:null,correct_answer:ex.answer,theme:ex.theme,difficulty:ex.difficulty,mode:'exam',session_id:examData.session_id,user:currentUser})});
+        await safeSubmit({exercise_id:ex.id,answer:null,correct_answer:ex.answer,theme:ex.theme,difficulty:ex.difficulty,mode:'exam',session_id:examData.session_id,user:currentUser});
         if (examIndex < examData.total-1) { examIndex++; showExamQuestion(); } else finishExam();
     }
 

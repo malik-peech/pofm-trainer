@@ -386,6 +386,27 @@ def reset_stats():
     return jsonify({"status": "ok"})
 
 
+@app.route("/api/stats/add_points", methods=["POST"])
+def add_manual_points():
+    """Ajouter manuellement des points (pour rattraper des points perdus)."""
+    data = request.json
+    user_id = data.get("user", "alia")
+    points = data.get("points", 0)
+    note = data.get("note", "Points ajoutes manuellement")
+
+    conn = get_db()
+    conn.execute(
+        """INSERT INTO results
+           (user_id, exercise_id, theme, difficulty, user_answer, correct_answer,
+            is_correct, is_retry, points, mode, session_id)
+           VALUES (?, 0, ?, 0, 0, 0, 1, 0, ?, 'manual', ?)""",
+        (user_id, note, points, f"manual_{datetime.now().strftime('%Y%m%d%H%M%S')}")
+    )
+    conn.commit()
+    conn.close()
+    return jsonify({"status": "ok", "points_added": points})
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
